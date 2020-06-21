@@ -1,0 +1,30 @@
+trigger AccountAddressTrigger on Account (before insert, before update,after insert, after update) {
+   if(trigger.isBefore)
+   {
+    for(Account acc : trigger.new){
+     if(acc.Match_Billing_Address__c==true && acc.BillingPostalCode!= null )
+      {
+       acc.ShippingPostalCode =acc.BillingPostalCode;
+      }
+     }
+    }
+
+    if(trigger.isafter){
+    List<Contact> acclist = new List<Contact>();
+    List<Contact> conlist= new List<Contact>();
+    Set<id> accid = new set<id>();
+     for(Account a :trigger.new){
+      if(a.SLA__c == 'GOLD'){
+       // acclist.add(a);
+        accid.add(a.id);
+      }
+   conlist = [select id from contact where Accountid in : accid];
+  
+       for(Contact c: conlist){
+        c.level__c='Tertiary';
+        acclist.add(c);
+       }
+       }
+    update acclist;
+  }
+}
